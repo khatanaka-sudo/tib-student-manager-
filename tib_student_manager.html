@@ -1,0 +1,1457 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TIB 学生メンバー管理システム</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f4f0;
+  --white: #ffffff;
+  --border: #e0ddd6;
+  --border-dark: #c8c4bb;
+  --text: #1a1916;
+  --muted: #8a8680;
+  --accent: #2d5a3d;
+  --accent-light: #e8f0eb;
+  --accent2: #c4501a;
+  --accent2-light: #fdf0eb;
+  --accent3: #1a4a6e;
+  --accent3-light: #e8eef5;
+  --accent4: #6e4a1a;
+  --accent4-light: #f5ede8;
+  --tag-green: #2d5a3d;
+  --tag-orange: #c4501a;
+  --tag-blue: #1a4a6e;
+  --row-hover: #faf9f7;
+  --shadow: 0 1px 4px rgba(0,0,0,0.08);
+  --radius: 8px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 13px;
+  min-height: 100vh;
+}
+
+/* ===== LAYOUT ===== */
+.app { display: flex; height: 100vh; overflow: hidden; }
+
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo-badge {
+  display: inline-block;
+  background: var(--accent);
+  color: white;
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  margin-bottom: 6px;
+}
+
+.logo-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.logo-sub {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.sidebar-nav {
+  padding: 12px 8px;
+  flex: 1;
+}
+
+.nav-section-label {
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 8px 12px 4px;
+  font-family: 'DM Mono', monospace;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+  margin-bottom: 2px;
+}
+
+.nav-item:hover { background: var(--bg); color: var(--text); }
+.nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 500; }
+.nav-icon { font-size: 15px; width: 18px; text-align: center; }
+.nav-label { font-size: 12px; }
+
+.nav-count {
+  margin-left: auto;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  background: var(--border);
+  padding: 1px 6px;
+  border-radius: 10px;
+  color: var(--muted);
+}
+
+.nav-item.active .nav-count {
+  background: var(--accent);
+  color: white;
+}
+
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  font-size: 10px;
+  color: var(--muted);
+  font-family: 'DM Mono', monospace;
+}
+
+/* Main */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Topbar */
+.topbar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.topbar-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.topbar-sub {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.topbar-actions { margin-left: auto; display: flex; gap: 8px; }
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s;
+  font-weight: 500;
+}
+
+.btn-primary { background: var(--accent); color: white; }
+.btn-primary:hover { background: #245030; }
+.btn-secondary { background: var(--white); color: var(--text); border: 1px solid var(--border-dark); }
+.btn-secondary:hover { background: var(--bg); }
+.btn-danger { background: #fff0ed; color: var(--accent2); border: 1px solid #f5c4b4; }
+.btn-danger:hover { background: #ffe5dd; }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+
+/* Content */
+.content { flex: 1; overflow-y: auto; padding: 24px; }
+
+/* Panel system */
+.panel { display: none; }
+.panel.active { display: block; animation: fadeIn 0.2s ease; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Stats cards */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.stat-card.green::before { background: var(--accent); }
+.stat-card.orange::before { background: var(--accent2); }
+.stat-card.blue::before { background: var(--accent3); }
+.stat-card.brown::before { background: var(--accent4); }
+
+.stat-icon { font-size: 18px; margin-bottom: 8px; }
+.stat-value { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; color: var(--text); }
+.stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.stat-sub { font-size: 10px; color: var(--muted); margin-top: 4px; font-family: 'DM Mono', monospace; }
+
+/* Table */
+.table-wrapper {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.table-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  background: var(--white);
+}
+
+.table-header-title {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 10px;
+  margin-left: auto;
+}
+
+.search-box input {
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  width: 160px;
+  color: var(--text);
+}
+
+.search-box input::placeholder { color: var(--muted); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: var(--bg);
+  padding: 8px 14px;
+  text-align: left;
+  font-size: 10px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+td {
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  color: var(--text);
+  vertical-align: middle;
+}
+
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--row-hover); }
+
+/* Tags */
+.tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.tag-green { background: var(--accent-light); color: var(--tag-green); }
+.tag-orange { background: var(--accent2-light); color: var(--tag-orange); }
+.tag-blue { background: var(--accent3-light); color: var(--tag-blue); }
+.tag-brown { background: var(--accent4-light); color: var(--accent4); }
+.tag-gray { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+
+/* Role tags */
+.role-chip {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* Attendance dots */
+.attend-dots { display: flex; gap: 3px; flex-wrap: wrap; }
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 2px;
+}
+.dot-present { background: var(--accent); }
+.dot-absent { background: var(--border); }
+
+/* Progress bar */
+.mini-bar {
+  width: 60px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+/* Modal */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 100;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-overlay.open { display: flex; }
+
+.modal {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 28px;
+  width: 480px;
+  max-width: 95vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-row { margin-bottom: 14px; }
+.form-label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 4px;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.5px;
+}
+
+.form-input, .form-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border-dark);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: 'Noto Sans JP', sans-serif;
+  color: var(--text);
+  background: var(--white);
+  outline: none;
+  transition: border 0.15s;
+}
+
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: var(--text);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 12px;
+  z-index: 200;
+  display: none;
+  animation: toastIn 0.3s ease;
+}
+
+.toast.show { display: flex; align-items: center; gap: 8px; }
+
+@keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* Attendance Panel */
+.month-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.month-btn {
+  width: 28px; height: 28px;
+  border: 1px solid var(--border-dark);
+  border-radius: 6px;
+  background: var(--white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  transition: all 0.15s;
+}
+
+.month-btn:hover { background: var(--bg); }
+.month-label { font-weight: 700; font-size: 14px; }
+
+.attend-grid {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.attend-row {
+  display: grid;
+  grid-template-columns: 160px 1fr auto;
+  align-items: center;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+  transition: background 0.1s;
+}
+
+.attend-row:hover { background: var(--row-hover); }
+.attend-row:last-child { border-bottom: none; }
+.attend-row.header { background: var(--bg); padding: 8px 16px; }
+
+.attend-name { font-size: 12px; font-weight: 500; }
+.attend-uni { font-size: 10px; color: var(--muted); }
+
+.attend-toggle {
+  width: 28px; height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--border-dark);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  transition: all 0.15s;
+  background: var(--white);
+}
+
+.attend-toggle.present { background: var(--accent); border-color: var(--accent); color: white; }
+.attend-toggle:hover { border-color: var(--accent); }
+
+.attend-rate {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--muted);
+  width: 60px;
+  text-align: right;
+}
+
+/* Mentoring log */
+.mentor-list { display: flex; flex-direction: column; gap: 8px; }
+
+.mentor-item {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: start;
+  gap: 12px;
+  transition: all 0.15s;
+}
+
+.mentor-item:hover { border-color: var(--accent3); }
+
+.mentor-who { font-weight: 500; font-size: 13px; margin-bottom: 4px; }
+.mentor-meta { font-size: 11px; color: var(--muted); display: flex; gap: 12px; flex-wrap: wrap; }
+.mentor-note { font-size: 11px; color: var(--text); margin-top: 6px; padding-top: 6px; border-top: 1px solid var(--border); }
+
+.mentor-count {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--accent3);
+  text-align: center;
+}
+
+.mentor-count-label { font-size: 10px; color: var(--muted); text-align: center; }
+
+/* Pitch panel */
+.pitch-table-wrapper {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.progress-ring-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.ring-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.ring-info { }
+.ring-value { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; }
+.ring-label { font-size: 11px; color: var(--muted); }
+.ring-bar { flex: 1; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.ring-fill { height: 100%; border-radius: 3px; }
+
+/* Empty state */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted);
+}
+.empty-icon { font-size: 32px; margin-bottom: 10px; }
+.empty-text { font-size: 13px; }
+
+/* Responsive fix */
+@media (max-width: 768px) {
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .sidebar { width: 60px; }
+  .nav-label, .nav-count, .logo-title, .logo-sub { display: none; }
+  .sidebar-logo { padding: 12px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ===== SIDEBAR ===== -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-badge">TIB</div>
+      <div class="logo-title">学生メンバー<br>管理システム</div>
+      <div class="logo-sub">2026年度</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">MAIN</div>
+      <div class="nav-item active" onclick="switchPanel('members')">
+        <span class="nav-icon">👥</span>
+        <span class="nav-label">メンバー一覧</span>
+        <span class="nav-count" id="nav-count-members">0</span>
+      </div>
+      <div class="nav-item" onclick="switchPanel('attendance')">
+        <span class="nav-icon">📅</span>
+        <span class="nav-label">出席管理</span>
+      </div>
+      <div class="nav-item" onclick="switchPanel('mentoring')">
+        <span class="nav-icon">💬</span>
+        <span class="nav-label">メンタリング</span>
+        <span class="nav-count" id="nav-count-mentor">0</span>
+      </div>
+      <div class="nav-item" onclick="switchPanel('pitch')">
+        <span class="nav-icon">🎤</span>
+        <span class="nav-label">ピッチ大会</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">v1.0 · 2026</div>
+  </aside>
+
+  <!-- ===== MAIN ===== -->
+  <div class="main">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="topbar-title">メンバー一覧</div>
+        <div class="topbar-sub" id="topbar-sub">全学生メンバーの基本情報を管理</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+        <div id="loading-indicator" style="display:none;align-items:center;gap:6px;font-size:11px;color:var(--muted);">
+          <span style="animation:spin 1s linear infinite;">⚙️</span>
+          <span>同期中...</span>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="loadAllData()" title="最新データを取得">
+          🔄 再読み込み
+        </button>
+      </div>
+      <div class="topbar-actions" id="topbar-actions">
+        <button class="btn btn-primary" onclick="openAddModal()">＋ メンバー追加</button>
+      </div>
+    </div>
+
+    <!-- Content area -->
+    <div class="content">
+
+      <!-- ===== MEMBERS PANEL ===== -->
+      <div id="panel-members" class="panel active">
+        <div class="stats-row">
+          <div class="stat-card green">
+            <div class="stat-icon">👥</div>
+            <div class="stat-value" id="stat-total">0</div>
+            <div class="stat-label">総メンバー数</div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-value" id="stat-hosai">0</div>
+            <div class="stat-label">運営委員補佐</div>
+            <div class="stat-sub">目標: 2名以上</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-icon">🎨</div>
+            <div class="stat-value" id="stat-creator">0</div>
+            <div class="stat-label">クリエイターズ</div>
+            <div class="stat-sub">目標: 3名以上</div>
+          </div>
+          <div class="stat-card brown">
+            <div class="stat-icon">📊</div>
+            <div class="stat-value" id="stat-active-rate">—</div>
+            <div class="stat-label">アクティブ率</div>
+            <div class="stat-sub">目標: 50%以上</div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <div class="table-header">
+            <span class="table-header-title">メンバー</span>
+            <span style="font-size:11px;color:var(--muted);" id="member-count-label">0名</span>
+            <div class="search-box">
+              <span>🔍</span>
+              <input type="text" id="member-search" placeholder="名前・大学で検索..." oninput="filterMembers()">
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>名前</th>
+                <th>大学</th>
+                <th>学年</th>
+                <th>役割</th>
+                <th>関心分野</th>
+                <th>連絡先</th>
+                <th>登録日</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="member-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== ATTENDANCE PANEL ===== -->
+      <div id="panel-attendance" class="panel">
+        <div class="stats-row">
+          <div class="stat-card green">
+            <div class="stat-icon">✅</div>
+            <div class="stat-value" id="attend-present-count">0</div>
+            <div class="stat-label">今月出席</div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">❌</div>
+            <div class="stat-value" id="attend-absent-count">0</div>
+            <div class="stat-label">今月欠席</div>
+          </div>
+          <div class="stat-card blue">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value" id="attend-rate-display">—</div>
+            <div class="stat-label">今月出席率</div>
+            <div class="stat-sub">目標: 50%以上</div>
+          </div>
+          <div class="stat-card brown">
+            <div class="stat-icon">🗓</div>
+            <div class="stat-value" id="attend-months">0</div>
+            <div class="stat-label">記録済み月数</div>
+          </div>
+        </div>
+
+        <div class="month-selector">
+          <button class="month-btn" onclick="changeMonth(-1)">‹</button>
+          <span class="month-label" id="month-display">2026年4月</span>
+          <button class="month-btn" onclick="changeMonth(1)">›</button>
+          <span style="font-size:11px;color:var(--muted);margin-left:8px;">月例会出席を記録</span>
+          <button class="btn btn-secondary btn-sm" style="margin-left:auto;" onclick="saveAttendance()">💾 保存</button>
+        </div>
+
+        <div class="attend-grid">
+          <div class="attend-row header">
+            <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);">MEMBER</span>
+            <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);">今月</span>
+            <span style="font-size:10px;font-family:'DM Mono',monospace;color:var(--muted);width:60px;text-align:right;">累計率</span>
+          </div>
+          <div id="attendance-list"></div>
+        </div>
+      </div>
+
+      <!-- ===== MENTORING PANEL ===== -->
+      <div id="panel-mentoring" class="panel">
+        <div class="stats-row">
+          <div class="stat-card blue">
+            <div class="stat-icon">💬</div>
+            <div class="stat-value" id="stat-mentor-total">0</div>
+            <div class="stat-label">総メンタリング回数</div>
+            <div class="stat-sub">目標: 年間12回</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">👤</div>
+            <div class="stat-value" id="stat-mentor-unique">0</div>
+            <div class="stat-label">対象学生数</div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">📋</div>
+            <div class="stat-value" id="stat-mentor-this-month">0</div>
+            <div class="stat-label">今月の実施数</div>
+          </div>
+          <div class="stat-card brown">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-value" id="stat-mentor-progress">0%</div>
+            <div class="stat-label">年間目標進捗</div>
+          </div>
+        </div>
+
+        <div class="table-wrapper" style="margin-bottom:16px;">
+          <div class="table-header">
+            <span class="table-header-title">メンタリング記録</span>
+            <div class="topbar-actions" style="margin-left:auto;">
+              <button class="btn btn-primary btn-sm" onclick="openMentorModal()">＋ 記録追加</button>
+            </div>
+          </div>
+          <div id="mentor-list" class="mentor-list" style="padding:12px;"></div>
+        </div>
+      </div>
+
+      <!-- ===== PITCH PANEL ===== -->
+      <div id="panel-pitch" class="panel">
+        <div class="progress-ring-container">
+          <div class="ring-card">
+            <div class="ring-info">
+              <div class="ring-value" id="pitch-tib-rate">—%</div>
+              <div class="ring-label">TIB所属率</div>
+              <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;">目標: 80%以上</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;flex:1;">
+              <div class="ring-bar"><div class="ring-fill" id="pitch-bar" style="width:0%;background:var(--accent);"></div></div>
+            </div>
+          </div>
+          <div class="ring-card">
+            <div class="ring-info">
+              <div class="ring-value" id="pitch-total">0</div>
+              <div class="ring-label">登録チーム数</div>
+            </div>
+          </div>
+          <div class="ring-card">
+            <div class="ring-info">
+              <div class="ring-value" id="pitch-mentor3">0</div>
+              <div class="ring-label">3回以上メンタリング済</div>
+              <div style="font-size:10px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;">目標: 全チーム</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <div class="table-header">
+            <span class="table-header-title">ピッチ大会 参加チーム</span>
+            <div style="margin-left:auto;">
+              <button class="btn btn-primary btn-sm" onclick="openPitchModal()">＋ チーム登録</button>
+            </div>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>チーム名</th>
+                <th>代表者</th>
+                <th>TIB所属</th>
+                <th>メンタリング回数</th>
+                <th>ステータス</th>
+                <th>登録日</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="pitch-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<!-- ===== MODAL: Add Member ===== -->
+<div class="modal-overlay" id="modal-member">
+  <div class="modal">
+    <div class="modal-title">👤 メンバー追加</div>
+    <div class="form-grid-2">
+      <div class="form-row">
+        <label class="form-label">名前 *</label>
+        <input class="form-input" id="m-name" placeholder="山田 太郎">
+      </div>
+      <div class="form-row">
+        <label class="form-label">よみがな</label>
+        <input class="form-input" id="m-kana" placeholder="やまだ たろう">
+      </div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-row">
+        <label class="form-label">大学名 *</label>
+        <input class="form-input" id="m-uni" placeholder="○○大学">
+      </div>
+      <div class="form-row">
+        <label class="form-label">学年 *</label>
+        <select class="form-select" id="m-grade">
+          <option value="">選択</option>
+          <option>学部1年</option><option>学部2年</option><option>学部3年</option><option>学部4年</option>
+          <option>修士1年</option><option>修士2年</option><option>博士</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">役割</label>
+      <select class="form-select" id="m-role">
+        <option value="一般メンバー">一般メンバー</option>
+        <option value="運営委員補佐">運営委員補佐</option>
+        <option value="クリエイターズ">クリエイターズ</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">関心分野</label>
+      <input class="form-input" id="m-interest" placeholder="例: スタートアップ, AI, デザイン">
+    </div>
+    <div class="form-row">
+      <label class="form-label">メールアドレス</label>
+      <input class="form-input" id="m-email" type="email" placeholder="example@mail.com">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-member')">キャンセル</button>
+      <button class="btn btn-primary" onclick="addMember()">追加する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: Mentoring ===== -->
+<div class="modal-overlay" id="modal-mentor">
+  <div class="modal">
+    <div class="modal-title">💬 メンタリング記録</div>
+    <div class="form-grid-2">
+      <div class="form-row">
+        <label class="form-label">対象メンバー *</label>
+        <select class="form-select" id="mt-member"></select>
+      </div>
+      <div class="form-row">
+        <label class="form-label">実施日 *</label>
+        <input class="form-input" id="mt-date" type="date">
+      </div>
+    </div>
+    <div class="form-grid-2">
+      <div class="form-row">
+        <label class="form-label">メンター名</label>
+        <input class="form-input" id="mt-mentor" placeholder="担当メンター名">
+      </div>
+      <div class="form-row">
+        <label class="form-label">形式</label>
+        <select class="form-select" id="mt-type">
+          <option>対面</option><option>オンライン</option><option>グループ</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">テーマ・内容メモ</label>
+      <input class="form-input" id="mt-note" placeholder="例: ビジネスモデル検討、ピッチ資料フィードバック">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-mentor')">キャンセル</button>
+      <button class="btn btn-primary" onclick="addMentoring()">記録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MODAL: Pitch Team ===== -->
+<div class="modal-overlay" id="modal-pitch">
+  <div class="modal">
+    <div class="modal-title">🎤 チーム登録</div>
+    <div class="form-grid-2">
+      <div class="form-row">
+        <label class="form-label">チーム名 *</label>
+        <input class="form-input" id="pt-team" placeholder="チーム名">
+      </div>
+      <div class="form-row">
+        <label class="form-label">代表者名 *</label>
+        <input class="form-input" id="pt-leader" placeholder="代表者名">
+      </div>
+    </div>
+    <div class="form-row">
+      <label class="form-label">TIB学生メンバーシップ所属</label>
+      <select class="form-select" id="pt-tib">
+        <option value="yes">所属あり</option>
+        <option value="no">所属なし（要登録）</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label class="form-label">ステータス</label>
+      <select class="form-select" id="pt-status">
+        <option>応募済</option><option>メンタリング中</option><option>登壇確定</option><option>辞退</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal('modal-pitch')">キャンセル</button>
+      <button class="btn btn-primary" onclick="addPitchTeam()">登録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">✅ <span id="toast-msg"></span></div>
+
+<script>
+// ===== GOOGLE SHEETS API CONFIG =====
+// ⚠️ 重要: 以下のURLをあなたのGoogle Apps ScriptのウェブアプリURLに置き換えてください
+const SCRIPT_URL = 'ここにGASのウェブアプリURLを貼り付けてください';
+
+// ===== DATA =====
+let members = [];
+let attendance = {};
+let mentoringLogs = [];
+let pitchTeams = [];
+
+let currentMonth = { year: 2026, month: 4 };
+let isLoading = false;
+
+// ===== API FUNCTIONS =====
+async function apiCall(action, data = null) {
+  if (!SCRIPT_URL || SCRIPT_URL.includes('ここに')) {
+    showToast('⚠ GASのURLが設定されていません。setup-guide.mdを参照してください。', true);
+    return null;
+  }
+
+  try {
+    isLoading = true;
+    updateLoadingState();
+
+    let url = `${SCRIPT_URL}?action=${action}`;
+    let options = { method: 'GET' };
+
+    if (data) {
+      url += `&data=${encodeURIComponent(JSON.stringify(data))}`;
+    }
+
+    const response = await fetch(url);
+    const result = await response.json();
+
+    if (!result.success && result.error) {
+      throw new Error(result.error);
+    }
+
+    return result.data;
+  } catch (error) {
+    console.error('API Error:', error);
+    showToast('⚠ データの取得/保存に失敗しました: ' + error.message, true);
+    return null;
+  } finally {
+    isLoading = false;
+    updateLoadingState();
+  }
+}
+
+async function loadAllData() {
+  showToast('📡 データを読み込み中...');
+  
+  const [membersData, attendanceData, mentoringData, pitchData] = await Promise.all([
+    apiCall('getMembers'),
+    apiCall('getAttendance'),
+    apiCall('getMentoring'),
+    apiCall('getPitchTeams')
+  ]);
+
+  if (membersData) members = membersData;
+  if (attendanceData) attendance = attendanceData;
+  if (mentoringData) mentoringLogs = mentoringData;
+  if (pitchData) pitchTeams = pitchData;
+
+  render();
+  showToast('✅ 最新データを読み込みました');
+}
+
+function updateLoadingState() {
+  const indicator = document.getElementById('loading-indicator');
+  if (indicator) {
+    indicator.style.display = isLoading ? 'flex' : 'none';
+  }
+}
+
+// ===== PANELS =====
+const panels = {
+  members: { title: 'メンバー一覧', sub: '全学生メンバーの基本情報を管理' },
+  attendance: { title: '月例会 出席管理', sub: '月ごとの出席を記録・集計' },
+  mentoring: { title: 'メンタリング記録', sub: '学生へのメンタリング実施履歴' },
+  pitch: { title: 'ピッチ大会 管理', sub: '2月ピッチ大会のチームと進捗を管理' },
+};
+
+function switchPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  document.querySelector(`.nav-item[onclick="switchPanel('${id}')"]`).classList.add('active');
+  document.getElementById('topbar-title').textContent = panels[id].title;
+  document.getElementById('topbar-sub').textContent = panels[id].sub;
+
+  // Update topbar actions
+  const actions = document.getElementById('topbar-actions');
+  if (id === 'members') {
+    actions.innerHTML = `<button class="btn btn-primary" onclick="openAddModal()">＋ メンバー追加</button>`;
+  } else if (id === 'attendance') {
+    actions.innerHTML = ``;
+  } else if (id === 'mentoring') {
+    actions.innerHTML = `<button class="btn btn-primary" onclick="openMentorModal()">＋ 記録追加</button>`;
+  } else if (id === 'pitch') {
+    actions.innerHTML = `<button class="btn btn-primary" onclick="openPitchModal()">＋ チーム登録</button>`;
+  }
+
+  render();
+}
+
+// ===== RENDER =====
+function render() {
+  renderMembers();
+  renderAttendance();
+  renderMentoring();
+  renderPitch();
+  updateNavCounts();
+}
+
+function renderMembers(filter = '') {
+  const query = (filter || document.getElementById('member-search')?.value || '').toLowerCase();
+  const filtered = members.filter(m =>
+    m.name.toLowerCase().includes(query) ||
+    m.uni.toLowerCase().includes(query) ||
+    (m.interest || '').toLowerCase().includes(query)
+  );
+
+  document.getElementById('member-count-label').textContent = filtered.length + '名';
+  document.getElementById('stat-total').textContent = members.length;
+  document.getElementById('stat-hosai').textContent = members.filter(m => m.role === '運営委員補佐').length;
+  document.getElementById('stat-creator').textContent = members.filter(m => m.role === 'クリエイターズ').length;
+
+  // Active rate
+  const key = `${currentMonth.year}-${String(currentMonth.month).padStart(2,'0')}`;
+  const att = attendance[key] || {};
+  const presentCount = members.filter(m => att[m.id]).length;
+  const rate = members.length > 0 ? Math.round(presentCount / members.length * 100) : 0;
+  document.getElementById('stat-active-rate').textContent = members.length > 0 ? rate + '%' : '—';
+
+  const tbody = document.getElementById('member-tbody');
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">👤</div><div class="empty-text">メンバーがいません</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(m => {
+    const roleColor = m.role === '運営委員補佐' ? 'tag-orange' : m.role === 'クリエイターズ' ? 'tag-blue' : 'tag-gray';
+    return `<tr>
+      <td><strong>${m.name}</strong><br><span style="font-size:10px;color:var(--muted);">${m.kana || ''}</span></td>
+      <td>${m.uni}</td>
+      <td>${m.grade}</td>
+      <td><span class="tag ${roleColor}">${m.role}</span></td>
+      <td style="max-width:140px;"><span style="font-size:11px;color:var(--muted);">${m.interest || '—'}</span></td>
+      <td style="font-size:11px;color:var(--muted);">${m.email || '—'}</td>
+      <td style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">${m.createdAt}</td>
+      <td>
+        <button class="btn btn-secondary btn-sm" onclick="deleteMember(${m.id})" style="padding:3px 8px;font-size:10px;">削除</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function filterMembers() {
+  renderMembers();
+}
+
+function renderAttendance() {
+  const key = `${currentMonth.year}-${String(currentMonth.month).padStart(2,'0')}`;
+  const att = attendance[key] || {};
+
+  document.getElementById('month-display').textContent = `${currentMonth.year}年${currentMonth.month}月`;
+
+  const presentCount = members.filter(m => att[m.id]).length;
+  const absentCount = members.length - presentCount;
+  const rate = members.length > 0 ? Math.round(presentCount / members.length * 100) : 0;
+
+  document.getElementById('attend-present-count').textContent = presentCount;
+  document.getElementById('attend-absent-count').textContent = absentCount;
+  document.getElementById('attend-rate-display').textContent = members.length > 0 ? rate + '%' : '—';
+  document.getElementById('attend-months').textContent = Object.keys(attendance).length;
+
+  const container = document.getElementById('attendance-list');
+  if (members.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">📅</div><div class="empty-text">メンバーを追加してください</div></div>`;
+    return;
+  }
+
+  container.innerHTML = members.map(m => {
+    const isPresent = !!att[m.id];
+    // Calc cumulative rate
+    const allKeys = Object.keys(attendance);
+    const totalMonths = allKeys.length;
+    const presentMonths = allKeys.filter(k => attendance[k][m.id]).length;
+    const cumRate = totalMonths > 0 ? Math.round(presentMonths / totalMonths * 100) : '—';
+
+    return `<div class="attend-row">
+      <div>
+        <div class="attend-name">${m.name}</div>
+        <div class="attend-uni">${m.uni} · ${m.grade}</div>
+      </div>
+      <button class="attend-toggle ${isPresent ? 'present' : ''}" onclick="toggleAttend(${m.id})" data-id="${m.id}">
+        ${isPresent ? '✓' : ''}
+      </button>
+      <div class="attend-rate">${typeof cumRate === 'number' ? cumRate + '%' : '—'}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAttend(memberId) {
+  const key = `${currentMonth.year}-${String(currentMonth.month).padStart(2,'0')}`;
+  if (!attendance[key]) attendance[key] = {};
+  attendance[key][memberId] = !attendance[key][memberId];
+  renderAttendance();
+  renderMembers();
+}
+
+function changeMonth(dir) {
+  currentMonth.month += dir;
+  if (currentMonth.month > 12) { currentMonth.month = 1; currentMonth.year++; }
+  if (currentMonth.month < 1) { currentMonth.month = 12; currentMonth.year--; }
+  renderAttendance();
+}
+
+async function saveAttendance() {
+  const result = await apiCall('saveAttendance', attendance);
+  if (result) {
+    showToast('✅ 出席データを保存しました');
+  }
+}
+
+function renderMentoring() {
+  const now = new Date();
+  const thisMonthKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+
+  const total = mentoringLogs.length;
+  const uniqueMembers = new Set(mentoringLogs.map(l => l.memberId)).size;
+  const thisMonth = mentoringLogs.filter(l => l.date.startsWith(thisMonthKey.replace('-0','-'))).length;
+  const progress = Math.min(Math.round(total / 12 * 100), 100);
+
+  document.getElementById('stat-mentor-total').textContent = total;
+  document.getElementById('stat-mentor-unique').textContent = uniqueMembers;
+  document.getElementById('stat-mentor-this-month').textContent = thisMonth;
+  document.getElementById('stat-mentor-progress').textContent = progress + '%';
+
+  const container = document.getElementById('mentor-list');
+  if (mentoringLogs.length === 0) {
+    container.innerHTML = `<div class="empty-state"><div class="empty-icon">💬</div><div class="empty-text">記録がありません。「＋ 記録追加」から追加してください。</div></div>`;
+    return;
+  }
+
+  const sorted = [...mentoringLogs].sort((a, b) => b.date.localeCompare(a.date));
+  container.innerHTML = sorted.map(log => {
+    const member = members.find(m => m.id === log.memberId);
+    const memberName = member ? member.name : '不明';
+    return `<div class="mentor-item">
+      <div>
+        <div class="mentor-who">${memberName} <span style="font-weight:400;color:var(--muted);">へのメンタリング</span></div>
+        <div class="mentor-meta">
+          <span>📅 ${log.date}</span>
+          <span>👤 ${log.mentor || '—'}</span>
+          <span class="tag tag-blue">${log.type}</span>
+        </div>
+        ${log.note ? `<div class="mentor-note">📝 ${log.note}</div>` : ''}
+      </div>
+      <div>
+        <button class="btn btn-danger btn-sm" onclick="deleteMentor(${log.id})">削除</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderPitch() {
+  const total = pitchTeams.length;
+  const tibCount = pitchTeams.filter(t => t.tib === 'yes').length;
+  const tibRate = total > 0 ? Math.round(tibCount / total * 100) : 0;
+
+  // Count teams with 3+ mentoring sessions
+  const mentor3 = pitchTeams.filter(t => {
+    const leader = members.find(m => m.name === t.leader);
+    if (!leader) return false;
+    const count = mentoringLogs.filter(l => l.memberId === leader.id).length;
+    return count >= 3;
+  }).length;
+
+  document.getElementById('pitch-tib-rate').textContent = total > 0 ? tibRate + '%' : '—';
+  document.getElementById('pitch-bar').style.width = tibRate + '%';
+  document.getElementById('pitch-bar').style.background = tibRate >= 80 ? 'var(--accent)' : tibRate >= 50 ? 'var(--accent4)' : 'var(--accent2)';
+  document.getElementById('pitch-total').textContent = total;
+  document.getElementById('pitch-mentor3').textContent = mentor3;
+
+  const tbody = document.getElementById('pitch-tbody');
+  if (pitchTeams.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state"><div class="empty-icon">🎤</div><div class="empty-text">チームがありません</div></div></td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = pitchTeams.map(t => {
+    const tibTag = t.tib === 'yes' ? '<span class="tag tag-green">✓ 所属あり</span>' : '<span class="tag tag-orange">⚠ 要登録</span>';
+    const statusTag = {
+      '応募済': 'tag-gray',
+      'メンタリング中': 'tag-blue',
+      '登壇確定': 'tag-green',
+      '辞退': 'tag-orange'
+    }[t.status] || 'tag-gray';
+
+    const leader = members.find(m => m.name === t.leader);
+    const mentorCount = leader ? mentoringLogs.filter(l => l.memberId === leader.id).length : 0;
+    const barW = Math.min(mentorCount / 3 * 100, 100);
+
+    return `<tr>
+      <td><strong>${t.team}</strong></td>
+      <td>${t.leader}</td>
+      <td>${tibTag}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="mini-bar"><div class="mini-bar-fill" style="width:${barW}%"></div></div>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;">${mentorCount}/3回</span>
+        </div>
+      </td>
+      <td><span class="tag ${statusTag}">${t.status}</span></td>
+      <td style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;">${t.createdAt}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deletePitch(${t.id})">削除</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateNavCounts() {
+  document.getElementById('nav-count-members').textContent = members.length;
+  document.getElementById('nav-count-mentor').textContent = mentoringLogs.length;
+}
+
+// ===== MODALS =====
+function openAddModal() {
+  ['m-name','m-kana','m-uni','m-email','m-interest'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('m-grade').value = '';
+  document.getElementById('m-role').value = '一般メンバー';
+  document.getElementById('modal-member').classList.add('open');
+}
+
+function openMentorModal() {
+  const sel = document.getElementById('mt-member');
+  sel.innerHTML = members.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+  document.getElementById('mt-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('mt-mentor').value = '';
+  document.getElementById('mt-note').value = '';
+  document.getElementById('modal-mentor').classList.add('open');
+}
+
+function openPitchModal() {
+  ['pt-team','pt-leader'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pt-tib').value = 'yes';
+  document.getElementById('pt-status').value = '応募済';
+  document.getElementById('modal-pitch').classList.add('open');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+// Close on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
+});
+
+// ===== ADD ACTIONS =====
+async function addMember() {
+  const name = document.getElementById('m-name').value.trim();
+  const uni = document.getElementById('m-uni').value.trim();
+  const grade = document.getElementById('m-grade').value;
+  if (!name || !uni || !grade) { showToast('⚠ 名前・大学・学年は必須です', true); return; }
+
+  const memberData = {
+    name,
+    kana: document.getElementById('m-kana').value.trim(),
+    uni,
+    grade,
+    role: document.getElementById('m-role').value,
+    interest: document.getElementById('m-interest').value.trim(),
+    email: document.getElementById('m-email').value.trim(),
+    createdAt: new Date().toISOString().split('T')[0]
+  };
+
+  const result = await apiCall('addMember', memberData);
+  if (result) {
+    closeModal('modal-member');
+    await loadAllData();
+    showToast(`✅ ${name} を追加しました`);
+  }
+}
+
+async function addMentoring() {
+  const memberId = parseInt(document.getElementById('mt-member').value);
+  const date = document.getElementById('mt-date').value;
+  if (!memberId || !date) { showToast('⚠ 対象者と日付は必須です', true); return; }
+
+  const logData = {
+    memberId,
+    date,
+    mentor: document.getElementById('mt-mentor').value.trim(),
+    type: document.getElementById('mt-type').value,
+    note: document.getElementById('mt-note').value.trim()
+  };
+
+  const result = await apiCall('addMentoring', logData);
+  if (result) {
+    closeModal('modal-mentor');
+    await loadAllData();
+    showToast('✅ メンタリング記録を追加しました');
+  }
+}
+
+async function addPitchTeam() {
+  const team = document.getElementById('pt-team').value.trim();
+  const leader = document.getElementById('pt-leader').value.trim();
+  if (!team || !leader) { showToast('⚠ チーム名と代表者は必須です', true); return; }
+
+  const teamData = {
+    team,
+    leader,
+    tib: document.getElementById('pt-tib').value,
+    status: document.getElementById('pt-status').value,
+    createdAt: new Date().toISOString().split('T')[0]
+  };
+
+  const result = await apiCall('addPitchTeam', teamData);
+  if (result) {
+    closeModal('modal-pitch');
+    await loadAllData();
+    showToast(`✅ ${team} を登録しました`);
+  }
+}
+
+// ===== DELETE =====
+async function deleteMember(id) {
+  if (!confirm('このメンバーを削除しますか？')) return;
+  const result = await apiCall('deleteMember', { id });
+  if (result) {
+    await loadAllData();
+    showToast('✅ 削除しました');
+  }
+}
+
+async function deleteMentor(id) {
+  if (!confirm('この記録を削除しますか？')) return;
+  const result = await apiCall('deleteMentoring', { id });
+  if (result) {
+    await loadAllData();
+    showToast('✅ 削除しました');
+  }
+}
+
+async function deletePitch(id) {
+  if (!confirm('このチームを削除しますか？')) return;
+  const result = await apiCall('deletePitchTeam', { id });
+  if (result) {
+    await loadAllData();
+    showToast('✅ 削除しました');
+  }
+}
+
+// ===== TOAST =====
+function showToast(msg, isWarning = false) {
+  const t = document.getElementById('toast');
+  const m = document.getElementById('toast-msg');
+  t.innerHTML = (isWarning ? '⚠ ' : '✅ ') + msg;
+  t.classList.add('show');
+  t.style.background = isWarning ? 'var(--accent2)' : 'var(--text)';
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded', () => {
+  loadAllData();
+});
+
+// ===== TOAST =====</script>
+</body>
+</html>
